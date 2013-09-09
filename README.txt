@@ -1,0 +1,1 @@
+This project demonstrate the aliasing effect using python and matplotlib
