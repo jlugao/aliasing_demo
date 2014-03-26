@@ -11,9 +11,7 @@ The current implementation is cross-platform because I'm using mainly numpy and 
 #### Windows
 
   * Install [PythonXY](https://code.google.com/p/pythonxy/).
-  * Fork the project and run
-  * Install [GIT](https://help.github.com/articles/set-up-git#platform-windows) and make an user account. 
-  * Fork the project or download zip file.
+  * download zip file and extract.
   * Go to project folder and run it
 
 #### Linux
@@ -21,7 +19,7 @@ The current implementation is cross-platform because I'm using mainly numpy and 
   * First install python 2.7 and PyQt4 and pip.
 
 ```
-sudo apt-get install python2.7 python-pip python-qt4 qt4-dev-tools build-essential
+sudo apt-get install python2.7 python-pip python-qt4 qt4-dev-tools build-essential git git-core git-doc
 ```
 
   * Then, install the dependencies
@@ -30,6 +28,11 @@ sudo apt-get install python2.7 python-pip python-qt4 qt4-dev-tools build-essenti
 pip install numpy matplotlib scipy
 ```
 
-  * Install [GIT](https://help.github.com/articles/set-up-git#platform-linux) and make an user account. 
-  * Fork the project. 
-  * Go to the project folder and run it.
+  * Get the files.
+
+```
+git clone https://github.com/jlugao/aliasing_demo.git
+cd aliasing_demo
+./pds3.py
+
+```
