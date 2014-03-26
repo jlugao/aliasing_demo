@@ -13,7 +13,7 @@ The current implementation is cross-platform because I'm using mainly numpy and 
   * Install [PythonXY](https://code.google.com/p/pythonxy/).
   * Fork the project and run
   * Install [GIT](https://help.github.com/articles/set-up-git#platform-windows) and make an user account. 
-  * Fork the project
+  * Fork the project or download zip file.
   * Go to project folder and run it
 
 #### Linux
