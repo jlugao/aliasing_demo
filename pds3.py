@@ -1,76 +1,116 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Aug 21 21:58:02 2013
+Programa para demonstrar o efeito de aliasing em uma onda senoidal
+com frequencia de amostragem fixa e frequência de oscilacao variavel.
+Esse programa eh parte de uma serie de applets, desenvolvidas na faculdade
+de engenharia de ilha solteira, feitas para demonstrar conceitos de processamento
+digital de sinais.
 
-@author: John
+@autor: Joao Ricardo Lhullier Lugao
+@laboratorio: LUS - Laboratorio de Ultrassom
+@contato: joaolhullier@gmail.com
 """
 
 from __future__ import division
 import numpy as np
-import pylab
-from matplotlib.widgets import Slider
+import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import sys
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from scipy import signal
+
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+class mywidget(QWidget):
+    def __init__(self,Parent=None):
+        super(mywidget,self).__init__(Parent)
+        self.figure=plt.figure(figsize=(15,25),facecolor='w',dpi=50)
+        self.canvas=FigureCanvas(self.figure)
+        self.toolbar=NavigationToolbar(self.canvas,self)
+        self.slider=QSlider(Qt.Horizontal,self)
+        self.slider.setRange(1, 100)
+        self.slider.setValue(5)
+        self.slider.valueChanged[int].connect(self.changeValue)
+        self.label=QLabel('Taxa de amostragem 50 Hz')
+        self.spinbox=QSpinBox()
+        self.spinbox.setValue(5)
+        self.spinbox.valueChanged.connect(self.sliderchange)
+        self.spinbox.setRange(1,100)
+        layout=QVBoxLayout()
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        layout.addWidget(self.slider)
+        layout.addWidget(self.spinbox)
+        layout.addWidget(self.label)
+
+        self.slider.valueChanged.connect(self.changeValue)
+        self.setLayout(layout)
+        self.plot()
+        #self.changeValue(5)
+
+    def sliderchange(self,value):
+        self.slider.setValue(value)
+
+    def plot(self):
+        self.amostrasporseg=15*5 #samples/sec
+        frequenciasinal=5 #Hz
+        omega= frequenciasinal
+        self.z=2*np.pi*np.arange(0,2*np.pi,1/self.amostrasporseg)
+        y=np.sin(self.z*omega)
+        k=y*signal.hann(len(y))
+
+        ylinha= 20*np.log10(abs(np.fft.fft(k,2048)))
+        ylinha=np.tile(ylinha,3)
+
+        zlinha=np.linspace(-2,4,len(ylinha))
+        self.figure.subplots_adjust(bottom=.75)
+        gs = gridspec.GridSpec(5, 1,height_ratios=[0.2,1,0.25,1,0.2])
+        ax =self.figure.add_subplot(gs[1])
+        self.plot2,=plt.plot(zlinha,ylinha)
+        plt.title('Espectro do sinal')
+        plt.xlabel(r'$\omega$')
+        plt.ylabel(r'|X($\omega$)|')
+
+        plt.xticks((-2,-1,0,1,2,3,4),[r'$-2\pi$',r'$-\pi$','0',r'$\pi$',r'$2\pi$',r'$3\pi$',r'$4\pi$'])
+        #ax.set_xticks([-0.0442,0.0442], minor=True)
+        ax.xaxis.grid(True,which='major',linewidth=0.75,color='k',linestyle='--')
+        self.beta=self.figure.add_subplot(gs[3])
+        self.plot3,=plt.plot(self.z,y,label='Amostragem Correta')
+        plt.plot(self.z,y,'o',label='Amostragem Fixa')
+        plt.legend(loc='upper right')
+        self.beta.set_xlabel(r't')
+        self.beta.set_ylabel(r'x(t)')
+        self.beta.set_xlim([0,2*np.pi])
+        self.figure.tight_layout()
+
+    def changeValue(self,value):
+        self.spinbox.setValue(value)
+        freq = value
+        znovo=np.arange(0,2*np.pi,0.001)
+        omega= freq
+        omeganovo= freq
+        y=np.sin(self.z*omega)
+        yf=np.sin(znovo*omeganovo)
+        k=y*signal.hann(len(y))
+        ylinha=np.fft.fft(k,2048)
+        ylinha=np.tile(ylinha,3)
+        self.beta.clear()
+        self.beta.plot(znovo,yf,label='Amostragem Correta')
+        self.beta.plot(self.z,y,'o-',lw=2,label='Amostragem Fixa')
+        plt.legend(loc='upper right')
+        self.beta.set_xlim([0,2*np.pi])
+        self.beta.set_xlabel(r't')
+        self.beta.set_ylabel(r'x(t)')
+        self.beta.set_title('Sinal com amostragem correta x Sinal com amostragem fixa')
+        self.plot2.set_ydata(20*np.log10(abs(ylinha)))
+        self.canvas.draw()
+        self.canvas.show()
 
 
-amostrasporseg=3*5 #samples/sec
-frequenciasinal=1*5 #Hz
-amostrasnoperiodo=np.round(amostrasporseg/frequenciasinal,decimals=0)
-
-omega= 2*np.pi*frequenciasinal/amostrasporseg
-z=np.arange(-2*np.pi,2*np.pi,1/amostrasporseg)
-
-
-
-zfft=np.arange(-1,1,2/len(z))
-print len(z)
-print len(zfft)
-y=np.sin(z*omega)
-ylinha= np.fft.fft(y)
-#zlinha= np.fft.fftfreq(len(z))
-zlinha=zfft
-
-figura=pylab.figure(figsize=(8, 6))
-figura.subplots_adjust(bottom=.75)
-gs = gridspec.GridSpec(3, 1,height_ratios=[1,2,0.25])
-figura.add_subplot(gs[0])
-#plot1,=pylab.plot(z,y,'-')
-#pylab.title('Sinal Com amostragem fixa')
-#pylab.xlim([-4,4])
-#figura.add_subplot(gs[0])
-plot2,=pylab.plot(zlinha,abs(ylinha))
-pylab.title('Espectro do sinal')
-pylab.xlabel(r'$\omega$/$\pi$')
-pylab.ylabel(r'|X($\omega$)|')
-beta=figura.add_subplot(gs[1])
-plot3,=pylab.plot(z,y,)
-pylab.plot(z,y,'o')
-beta.set_title('Sinal com amostragem correta x Sinal com amostragem fixa')
-beta.set_xlabel(r't')
-beta.set_ylabel(r'x(t)')
-beta.set_xlim([-4,4])
-axfreq = pylab.axes([0.25, 0.1, 0.65, 0.03])
-sfreq = Slider(axfreq, 'Freq', 0, 300.0, valinit=amostrasporseg)
-figura.tight_layout()
-
-def update(val):
-    freq = sfreq.val
-    znovo=np.arange(-2*np.pi,2*np.pi,1/freq)
-    amostragemreal= 3* sfreq.val
-    omega= 2*np.pi*freq/amostrasporseg
-    omega2= 2*np.pi*freq/amostrasporseg
-    y=np.sin(z*omega)
-    yf=np.sin(znovo*omega)
-    ylinha=np.fft.fft(y)#/amostrasporseg
-    #plot1.set_ydata(y)
-    beta.clear()
-    beta.plot(znovo,yf)
-    beta.plot(z,y,'o-',lw=2)
-    beta.set_xlim([-4,4])
-    beta.set_xlabel(r't')
-    beta.set_ylabel(r'x(t)')
-    beta.set_title('Sinal com amostragem correta x Sinal com amostragem fixa')
-    plot2.set_ydata(abs(ylinha))
-    pylab.draw()
-sfreq.on_changed(update)
-
-pylab.show()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ui = mywidget()
+    ui.show()
+    sys.exit(app.exec_())
