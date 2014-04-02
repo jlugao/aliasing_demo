@@ -33,6 +33,6 @@ pip install numpy matplotlib scipy
 ```
 git clone https://github.com/jlugao/aliasing_demo.git
 cd aliasing_demo
-./pds3.py
+python pds3.py
 
 ```
