@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Programa para demonstrar o efeito de aliasing em uma onda senoidal
